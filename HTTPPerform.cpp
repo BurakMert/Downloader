@@ -3,6 +3,16 @@ const string DOWNLOAD_PATH = "/root/AppStore/tmp/Downloads/"; // temporary downl
 const string INSTALL_PATH = "/root/AppStore/tmp/Install/"; // temporary install path
 const string MANIFEST_PATH = "/etc/appmand/";
 const string MOVE_PATH = "/data/bin/"; // binary path final destination
+const string CA_PATH = "/data/security/certs/";
+const string CA_INFO = "/data/security/certs/ca-chain.cert.pem";
+const string CLIENT_CERT = "/data/security/certs/client1.cert.pem";
+const string CLIENT_KEY = "/data/security/private/client1.key.pem";
+/*const string CA_PATH = "/home/burakmert/Projects/MMIS/scripts/Certificates/root_ca/intermediate/certs/";
+const string CA_INFO = "/home/burakmert/Projects/MMIS/scripts/Certificates/root_ca/intermediate/certs/ca-chain.cert.pem";
+const string CLIENT_CERT = "/home/burakmert/Projects/MMIS/scripts/Certificates/root_ca/intermediate/certs/client1.cert.pem";
+const string CLIENT_KEY = "/home/burakmert/Projects/MMIS/scripts/Certificates/root_ca/intermediate/private/client1.key.pem";*/
+
+
 /*const string DOWNLOAD_PATH = "/home/burakmert/Projects/MMIS/DownloaderApp/tmpDownload/";
 const string INSTALL_PATH = "/home/burakmert/Projects/MMIS/DownloaderApp/tmpInstall/"; 
 const string MANIFEST_PATH = "/home/burakmert/Projects/MMIS/DownloaderApp/tmpManifest/";
@@ -211,8 +221,21 @@ int HTTPPerform::getContent(string url, string& content) {
     if(curl){
         curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
         curl_easy_setopt(curl, CURLOPT_HTTPGET,1);
+        curl_easy_setopt(curl, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1);
+        /*Set authenticate server certificate, discard domain name check*/
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0);
+        /*------------*/
+        /* Set certificate chain and directory to authanticate server certificate*/
+        curl_easy_setopt(curl, CURLOPT_CAPATH,CA_PATH.c_str());
+        curl_easy_setopt(curl, CURLOPT_CAINFO,CA_INFO.c_str());
+        /*------------*/
+        /*Set client certicifate and key*/
+        curl_easy_setopt(curl,CURLOPT_SSLCERT,CLIENT_CERT.c_str());
+        curl_easy_setopt(curl,CURLOPT_SSLKEY,CLIENT_KEY.c_str());
+        /*------------*/
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, function_pt);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &content);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &content);        
         try{
             res = curl_easy_perform(curl);
             curl_easy_getinfo(curl,CURLINFO_RESPONSE_CODE,&httpCode);
@@ -225,12 +248,14 @@ int HTTPPerform::getContent(string url, string& content) {
         if (res != CURLE_OK) {
             content = curl_easy_strerror(res);
             returnFlag=0;
+             cout << "Res is :" << res << endl;
         }
         if(httpCode != 200)
         {
 
             returnFlag = 0;
             content = "HTTP Response " + to_string(httpCode) + " returned!";
+
         }
     }
     return returnFlag;
@@ -330,6 +355,19 @@ int HTTPPerform::sendMessage(string url, string msgToSend, string& content) {
         curl_easy_setopt(curl, CURLOPT_HTTPGET,1);
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, function_pt);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &content);
+        curl_easy_setopt(curl, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1);
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0);
+        
+         /*------------*/
+        /* Set certificate chain and directory to authanticate server certificate*/
+        curl_easy_setopt(curl, CURLOPT_CAPATH,CA_PATH.c_str());
+        curl_easy_setopt(curl, CURLOPT_CAINFO,CA_INFO.c_str());
+        /*------------*/
+        /*Set client certicifate and key*/
+        curl_easy_setopt(curl,CURLOPT_SSLCERT,CLIENT_CERT.c_str());
+        curl_easy_setopt(curl,CURLOPT_SSLKEY,CLIENT_KEY.c_str());
+        /*------------*/
 
         curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 3L);
 
@@ -375,13 +413,13 @@ applications* HTTPPerform::perform(ACTION action, int appId){
                 this->errorMessage = "Index page called with download request";
             }
             else {
-                url = this->baseUrl + "application/"+to_string(appId)+"/";
+                url = this->baseUrl + "/"+to_string(appId)+"/";
                 status = this->getContent(url,retVal);
                 if (status == 1)
                 {
                     cout << retVal << endl;
                     appList = this->parseString(retVal);
-                    download_url = this->baseUrl + "application/"+to_string(appId)+"/download";
+                    download_url = this->baseUrl + "/"+to_string(appId)+"/download";
                     installationStatus = this->download(download_url, appList->apps);
                     if(installationStatus != 1)
                     {
@@ -412,9 +450,9 @@ applications* HTTPPerform::perform(ACTION action, int appId){
             break;
         case SHOW:
             if(appId == 0)
-                url = this->baseUrl + "applications/";
+                url = this->baseUrl;
             else
-                url = this->baseUrl + "application/"+to_string(appId)+"/";
+                url = this->baseUrl + "/"+to_string(appId)+"/";
             status=this->getContent(url,retVal);
             if (status == 1)
                 appList = this->parseString(retVal);

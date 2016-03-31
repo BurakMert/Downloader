@@ -6,11 +6,11 @@
 
 
 int main(int argc, char** argv) {
-	HTTPPerform *performer = new HTTPPerform("http://10.155.10.213:8000/");
+	HTTPPerform *performer = new HTTPPerform("https://10.155.10.213:443/soberstore");
 	applications* appList;	
 	try {			
-		appList = performer->perform(DOWNLOAD,19);	
- 		if (performer->getError() == 1)
+		appList = performer->perform(SHOW,19);
+		if (performer->getError() == 1)
  			cout << "Error occured during HTTP request :" << performer->getErrorMessage() << endl;
  		else if (appList->apps != NULL)
  		{
@@ -28,7 +28,7 @@ int main(int argc, char** argv) {
  		if(appList->apps->isInstalled == 1 && appList->apps->isDownloaded) 
 			cout << "Application installed" << endl;			
 		else 		
-			cout << "Error occured: " << appList->apps->errorCode << endl;			
+			cout << "Error occured: " << appList->apps->errorCode << endl;		
 		
 	
 	}
