@@ -3,12 +3,11 @@ const string DOWNLOAD_PATH = "/root/AppStore/tmp/Downloads/"; // temporary downl
 const string INSTALL_PATH = "/root/AppStore/tmp/Install/"; // temporary install path
 const string MANIFEST_PATH = "/etc/appmand/";
 const string MOVE_PATH = "/data/bin/"; // binary path final destination
-const string CA_PATH = "/data/security/certs/";
-const string CA_INFO = "/data/security/certs/ca-chain.cert.pem";
-const string CLIENT_CERT = "/data/security/certs/client1.cert.pem";
-const string CLIENT_KEY = "/data/security/private/client1.key.pem";
-/*const string CA_PATH = "/home/burakmert/Projects/MMIS/scripts/Certificates/root_ca/intermediate/certs/";
-const string CA_INFO = "/home/burakmert/Projects/MMIS/scripts/Certificates/root_ca/intermediate/certs/ca-chain.cert.pem";
+const string CA_PATH = "/etc/crypt/certs/";
+const string CA_INFO = "/etc/crypt/certs/ca-chain.cert.pem";
+const string CLIENT_CERT = "/etc/crypt/certs/client1.cert.pem";
+const string CLIENT_KEY = "/etc/crypt/certs/client1.key.pem";
+/*const string CA_INFO = "/home/burakmert/Projects/MMIS/scripts/Certificates/root_ca/intermediate/certs/ca-chain.cert.pem";
 const string CLIENT_CERT = "/home/burakmert/Projects/MMIS/scripts/Certificates/root_ca/intermediate/certs/client1.cert.pem";
 const string CLIENT_KEY = "/home/burakmert/Projects/MMIS/scripts/Certificates/root_ca/intermediate/private/client1.key.pem";*/
 
@@ -16,8 +15,8 @@ const string CLIENT_KEY = "/home/burakmert/Projects/MMIS/scripts/Certificates/ro
 /*const string DOWNLOAD_PATH = "/home/burakmert/Projects/MMIS/DownloaderApp/tmpDownload/";
 const string INSTALL_PATH = "/home/burakmert/Projects/MMIS/DownloaderApp/tmpInstall/"; 
 const string MANIFEST_PATH = "/home/burakmert/Projects/MMIS/DownloaderApp/tmpManifest/";
-const string MOVE_PATH = "/home/burakmert/Projects/MMIS/DownloaderApp/Install/";*/
-
+const string MOVE_PATH = "/home/burakmert/Projects/MMIS/DownloaderApp/Install/";
+*/
 
 void clearDirectories()
 {
@@ -450,7 +449,7 @@ applications* HTTPPerform::perform(ACTION action, int appId){
             break;
         case SHOW:
             if(appId == 0)
-                url = this->baseUrl;
+                url = this->baseUrl +"/";
             else
                 url = this->baseUrl + "/"+to_string(appId)+"/";
             status=this->getContent(url,retVal);
