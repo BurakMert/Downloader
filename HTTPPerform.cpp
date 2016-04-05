@@ -7,12 +7,13 @@ const string CA_PATH = "/etc/crypt/certs/";
 const string CA_INFO = "/etc/crypt/certs/ca-chain.cert.pem";
 const string CLIENT_CERT = "/etc/crypt/certs/client1.cert.pem";
 const string CLIENT_KEY = "/etc/crypt/certs/client1.key.pem";
-/*const string CA_INFO = "/home/burakmert/Projects/MMIS/scripts/Certificates/root_ca/intermediate/certs/ca-chain.cert.pem";
+/*const string CA_PATH = "/home/burakmert/Projects/MMIS/scripts/Certificates/root_ca/intermediate/certs/";
+const string CA_INFO = "/home/burakmert/Projects/MMIS/scripts/Certificates/root_ca/intermediate/certs/ca-chain.cert.pem";
 const string CLIENT_CERT = "/home/burakmert/Projects/MMIS/scripts/Certificates/root_ca/intermediate/certs/client1.cert.pem";
-const string CLIENT_KEY = "/home/burakmert/Projects/MMIS/scripts/Certificates/root_ca/intermediate/private/client1.key.pem";*/
+const string CLIENT_KEY = "/home/burakmert/Projects/MMIS/scripts/Certificates/root_ca/intermediate/private/client1.key.pem";
 
 
-/*const string DOWNLOAD_PATH = "/home/burakmert/Projects/MMIS/DownloaderApp/tmpDownload/";
+const string DOWNLOAD_PATH = "/home/burakmert/Projects/MMIS/DownloaderApp/tmpDownload/";
 const string INSTALL_PATH = "/home/burakmert/Projects/MMIS/DownloaderApp/tmpInstall/"; 
 const string MANIFEST_PATH = "/home/burakmert/Projects/MMIS/DownloaderApp/tmpManifest/";
 const string MOVE_PATH = "/home/burakmert/Projects/MMIS/DownloaderApp/Install/";
@@ -292,7 +293,7 @@ int HTTPPerform::download(const string& url, application* app){
 
             if(res ==CURLE_OK)
             {
-                curl_easy_cleanup(curl);
+                //curl_easy_cleanup(curl);
                 fclose(fp);
                 installed = install(filePath, app);
                 if(installed != 0){
@@ -540,15 +541,15 @@ applications* HTTPPerform::parseString(string response)
     }
     else {
         cJSON* trial = cJSON_GetObjectItem(root,"applications");
-        const string keys[6] = {"id", "name", "developer", "icon", "size", "cgroup"};
+        const string keys[8] = {"id", "name", "developer", "icon", "size", "cgroup", "version", "date"};
             if(!trial)
             {
                 application* app = new application;
                 appList->size = 1;
                 int arrayIndex=0;
-                for(int i = 0 ; i<6; i++)
+                for(int i = 0 ; i<8; i++)
                 {
-                    cJSON* child = cJSON_GetObjectItem(root,keys[i].c_str());
+                    cJSON* child = cJSON_GetObjectItem(root,keys[i].c_str());                    
                     if(child!=NULL){
                         if(i==0)
                         {
@@ -556,8 +557,15 @@ applications* HTTPPerform::parseString(string response)
                         }
                         else if(i==4)
                         {
-                            app->size =child->valueint;
+                            app->size =child->valuedouble;
+
                         }
+                        else if (i == 6)
+                        {
+                            app->version = child->valuedouble;                            
+                        }
+                        else if (i==7)
+                            app->date = child->valuedouble;
                         else
                         {
                             fields[arrayIndex] = child->valuestring;
@@ -586,7 +594,7 @@ applications* HTTPPerform::parseString(string response)
                 {
                     arrayItem = cJSON_GetArrayItem(appsArray,i);
                     int index=0;
-                    for(int j = 0 ; j<6; j++)
+                    for(int j = 0 ; j<8; j++)
                     {
                         cJSON* child = cJSON_GetObjectItem(arrayItem,keys[j].c_str());
                         if(child!=NULL){
@@ -599,6 +607,10 @@ applications* HTTPPerform::parseString(string response)
                             {
                                 apps[i].size = child->valueint;
                             }
+                            else if (j == 6)
+                                apps[i].version = child->valuedouble;
+                            else if (j==7)
+                                apps[i].date = child->valueint;                        
                             else
                             {
                                fields[index] = child->valuestring;
